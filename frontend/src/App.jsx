@@ -1,7 +1,12 @@
+import MusicForm from "./components/MusicForm"
+import MusicList from "./components/MusicList"
+
 function App() {
   return (
     <div>
-      hello
+      <h1>Music Library</h1>
+      <MusicForm />
+      <MusicList />
     </div>
   )
 }
