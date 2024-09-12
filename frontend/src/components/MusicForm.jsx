@@ -8,6 +8,7 @@ import styled from '@emotion/styled';
 const MusicForm = () => {
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
+  const [type, setType] = useState('reggae');
   const [file, setFile] = useState(null);
   const fileInputRef = useRef(null);
   const dispatch = useDispatch();
@@ -19,20 +20,22 @@ const MusicForm = () => {
     formData.append('title', title);
     formData.append('artist', artist);
     formData.append('file', file);
+    formData.append('type', type); 
 
     try {
-      await axios.post('http://localhost:8000/api/musics/upload', formData);
-      alert('Music uploaded successfully');
-      dispatch(fetchMusics()); 
-      setTitle("");
-      setArtist("");
-      setFile(null);
-      fileInputRef.current.value = "";
-      navigate('/'); 
+        await axios.post('http://localhost:8000/api/musics/upload', formData);
+        alert('Music uploaded successfully');
+        dispatch(fetchMusics());
+        setTitle("");
+        setArtist("");
+        setFile(null);
+        fileInputRef.current.value = "";
+        navigate('/');
     } catch (error) {
-      alert('Error uploading music');
+        alert('Error uploading music');
+        console.log(error)
     }
-  };
+};
 
   return (
     <PageContainer>
@@ -46,6 +49,16 @@ const MusicForm = () => {
           <FormField>
             <label>Artist</label>
             <StyledInput type="text" value={artist} onChange={(e) => setArtist(e.target.value)} required />
+          </FormField>
+          <FormField>
+            <label>Music Type</label>
+            <select value={type} onChange={(e) => setType(e.target.value)}>
+                <option value="reggae">Reggae</option>
+                <option value="hiphop">Hip-Hop</option>
+                <option value="pop">Pop</option>
+                <option value="rock">Rock</option>
+                <option value="other">Other</option>
+            </select>
           </FormField>
           <FormField>
             <label>MP3 File</label>

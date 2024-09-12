@@ -29,14 +29,16 @@ router.post('/upload', upload.single('file'), async (req, res) => {
             title: req.body.title,
             artist: req.body.artist,
             filename: newFilename,
+            musicType: req.body.type 
         });
 
         await newMusic.save();
         res.json(newMusic);
     } catch (error) {
-        res.status(500).json({ message: 'Error uploading Music' });
+        res.status(500).json({ message: 'Error uploading music' });
     }
 });
+
 
 router.put('/:id', async (req, res) => {
     const updatedMusic = await Music.findByIdAndUpdate(req.params.id, req.body, { new: true });
