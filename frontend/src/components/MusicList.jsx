@@ -89,7 +89,7 @@ const MusicList = () => {
   const [currentMusic, setCurrentMusic] = useState(null);
   const [editMusic, setEditMusic] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef(null);
+  const audioRefs = useRef({}); // Object to store audio references
 
   useEffect(() => {
     dispatch(fetchMusics());
@@ -100,27 +100,38 @@ const MusicList = () => {
   };
 
   const handlePlayPauseClick = (music) => {
-    if (currentMusic && currentMusic._id === music._id && isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
+    const audioRef = audioRefs.current[music._id]; // Get the corresponding audio ref
+
+    // Check if the clicked music is the same as the current music
+    if (currentMusic && currentMusic._id === music._id) {
+      // If it is, toggle play/pause
+      if (isPlaying) {
+        audioRef.pause();
+        setIsPlaying(false);
+      } else {
+        audioRef.play().catch((error) => {
+          console.error('Error playing audio:', error);
+        });
+        setIsPlaying(true);
+      }
     } else {
-      if (currentMusic && currentMusic._id !== music._id) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
+      // If a different music item is clicked
+      if (currentMusic) {
+        const prevAudioRef = audioRefs.current[currentMusic._id];
+        if (prevAudioRef) {
+          prevAudioRef.pause(); // Pause the previously playing music
+          prevAudioRef.currentTime = 0; // Reset to the start
+        }
       }
 
+      // Set the new current music and play it
       setCurrentMusic(music);
       setIsPlaying(true);
-
-      if (audioRef.current) {
-        audioRef.current.src = `http://localhost:8000/api/musics/${music.filename}`;
-        audioRef.current.oncanplay = () => {
-          audioRef.current.play().catch((error) => {
-            console.error('Error playing audio:', error);
-            setIsPlaying(false);
-          });
-        };
-      }
+      audioRef.src = `http://localhost:8000/api/musics/${music.filename}`;
+      audioRef.play().catch((error) => {
+        console.error('Error playing audio:', error);
+        setIsPlaying(false);
+      });
     }
   };
 
@@ -153,10 +164,14 @@ const MusicList = () => {
                 </ControlButtons>
               </MusicDetails>
               <AudioPlayerWrapper>
+                {/* Store reference to audio element for each music item */}
                 <audio
-                  ref={audioRef}
+                  ref={(el) => (audioRefs.current[music._id] = el)} // Save reference in the object
                   className="audio-player"
-                  onEnded={() => setIsPlaying(false)}
+                  onEnded={() => {
+                    setIsPlaying(false);
+                    setCurrentMusic(null);
+                  }}
                   controls
                 />
               </AudioPlayerWrapper>
@@ -167,5 +182,6 @@ const MusicList = () => {
     </MusicListWrapper>
   );
 };
+
 
 export default MusicList;
