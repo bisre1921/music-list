@@ -1,16 +1,21 @@
 import styled from '@emotion/styled';
 import logo from "../assets/logo.png";
+import { Link } from 'react-router-dom'; 
 
 const Navbar = () => {
   return (
     <NavigationContainer>
       <LogoContainer>
-        <img src={logo} alt="logo" />
+        <Link to="/">
+          <img src={logo} alt="logo" />
+        </Link>
       </LogoContainer>
       <ButtonContainer>
-        <PostMusicButton>
-          Post Music
-        </PostMusicButton>
+        <Link to="/post-music"> 
+          <PostMusicButton>
+            Post Music
+          </PostMusicButton>
+        </Link>
       </ButtonContainer>
     </NavigationContainer>
   );
