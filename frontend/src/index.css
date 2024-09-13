@@ -1,4 +1,17 @@
+
 * {
     margin: 0;
     padding: 0;
+}
+
+html {
+    overflow-y: scroll; 
+}
+
+body {
+    overflow: hidden; 
+    height: 100%; 
+}
+::-webkit-scrollbar {
+    display: none; 
 }
