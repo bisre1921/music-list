@@ -2,8 +2,10 @@ import { call, put, takeEvery } from 'redux-saga/effects';
 import axios from 'axios';
 import { fetchMusics, fetchMusicsSuccess, fetchMusicsFailure, editMusic } from './musicsSlice';
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 function* fetchMusicsSaga() {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  
     try {
       const response = yield call(axios.get, `${backendUrl}/api/musics`);
       yield put(fetchMusicsSuccess(response.data));
