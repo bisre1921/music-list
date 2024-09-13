@@ -58,7 +58,13 @@ const EditMusicForm = ({ music, onClose }) => {
                 <option value="hiphop">Hip-Hop</option>
                 <option value="pop">Pop</option>
                 <option value="rock">Rock</option>
-                <option value="other">Other</option>
+                <option value="jazz">jazz</option>
+                <option value="blues">blues</option>
+                <option value="opera">opera</option>
+                <option value="funk">funk</option>
+                <option value="soul">soul</option>
+                <option value="vocal">vocal</option>
+                <option value="Other">Other</option>
               </StyledSelect>
             </FormField>
             <ButtonContainer>
@@ -84,7 +90,7 @@ const PageContainer = styled.div`
 `;
 
 const FormContainer = styled.div`
-  background: rgba(50, 50, 70, 0.8); /* Changed to a darker background */
+  background: rgba(50, 50, 70, 0.8); 
   backdrop-filter: blur(15px);
   padding: 40px;
   border-radius: 15px;
@@ -138,13 +144,13 @@ const StyledSelect = styled.select`
   padding: 12px;
   border-radius: 10px;
   border: none;
-  background-color: rgba(100, 100, 120, 0.8); /* Changed to a darker background for visibility */
+  background-color: rgba(100, 100, 120, 0.8); 
   color: #fff;
   font-size: 1rem;
   outline: none;
   transition: all 0.3s ease-in-out;
   &:focus {
-    background-color: rgba(100, 100, 120, 1); /* Slightly darker on focus */
+    background-color: rgba(100, 100, 120, 1); 
     box-shadow: 0 0 10px #FFD700;
   }
 `;

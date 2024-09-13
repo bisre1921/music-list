@@ -4,6 +4,8 @@ import { useDispatch } from 'react-redux';
 import { fetchMusics } from '../redux/musicsSlice'; 
 import { useNavigate } from 'react-router-dom'; 
 import styled from '@emotion/styled';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const MusicForm = () => {
   const [title, setTitle] = useState('');
@@ -24,7 +26,7 @@ const MusicForm = () => {
 
     try {
         await axios.post('http://localhost:8000/api/musics/upload', formData);
-        alert('Music uploaded successfully');
+        toast.success('Music uploaded successfully');
         dispatch(fetchMusics());
         setTitle("");
         setArtist("");
@@ -32,10 +34,10 @@ const MusicForm = () => {
         fileInputRef.current.value = "";
         navigate('/');
     } catch (error) {
-        alert('Error uploading music');
-        console.log(error)
+        toast.error('Error uploading music');
+        console.log(error);
     }
-};
+  };
 
   return (
     <PageContainer>
@@ -52,13 +54,19 @@ const MusicForm = () => {
           </FormField>
           <FormField>
             <label>Music Type</label>
-            <select value={type} onChange={(e) => setType(e.target.value)}>
-                <option value="reggae">Reggae</option>
-                <option value="hiphop">Hip-Hop</option>
-                <option value="pop">Pop</option>
-                <option value="rock">Rock</option>
-                <option value="other">Other</option>
-            </select>
+            <StyledSelect value={type} onChange={(e) => setType(e.target.value)}>
+              <option value="reggae">Reggae</option>
+              <option value="hiphop">Hip-Hop</option>
+              <option value="pop">Pop</option>
+              <option value="rock">Rock</option>
+              <option value="jazz">Jazz</option>
+              <option value="blues">Blues</option>
+              <option value="opera">Opera</option>
+              <option value="funk">Funk</option>
+              <option value="soul">Soul</option>
+              <option value="vocal">Vocal</option>
+              <option value="Other">Other</option>
+            </StyledSelect>
           </FormField>
           <FormField>
             <label>MP3 File</label>
@@ -67,11 +75,24 @@ const MusicForm = () => {
           <StyledButton type="submit">Upload Music</StyledButton>
         </StyledForm>
       </FormContainer>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </PageContainer>
   );
 };
 
+
 export default MusicForm;
+
 
 const PageContainer = styled.div`
   display: flex;
@@ -132,6 +153,22 @@ const StyledInput = styled.input`
     box-shadow: 0 0 10px #FFD700;
   }
 `;
+
+const StyledSelect = styled.select`
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background-color: rgba(100, 100, 120, 0.8); 
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease-in-out;
+  &:focus {
+    background-color: rgba(100, 100, 120, 1); 
+    box-shadow: 0 0 10px #FFD700;
+  }
+`;
+
 
 const FileInput = styled.input`
   padding: 12px;

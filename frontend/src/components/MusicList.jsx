@@ -5,10 +5,12 @@ import styled from '@emotion/styled';
 import { FaPlay, FaPause, FaEdit, FaTrash } from 'react-icons/fa';
 import EditMusicForm from './EditMusicForm';
 import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const MusicList = () => {
   const dispatch = useDispatch();
-  const { musics, loading } = useSelector((state) => state.musics || []);
+  const { musics, loading, error } = useSelector((state) => state.musics || []);
   const [selectedMusic, setSelectedMusic] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [playingMusicId, setPlayingMusicId] = useState(null);
@@ -18,37 +20,54 @@ const MusicList = () => {
   const [duration, setDuration] = useState(0);
   const audioRefs = useRef({});
 
+  const formatTime = (timeInSeconds) => {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
+
   useEffect(() => {
     dispatch(fetchMusics());
   }, [dispatch]);
 
-  const playMusic = (filename, id) => {
-    if (playingMusicId && playingMusicId !== id) {
-      stopMusic(playingMusicId);
+  useEffect(() => {
+    if (error) {
+      toast.error("Failed to load music data.");
     }
+  }, [error]);
 
-    const audio = new Audio(`http://localhost:8000/api/musics/${filename}`);
-    audioRefs.current[id] = audio;
+  const playMusic = (filename, id) => {
+    try {
+      if (playingMusicId && playingMusicId !== id) {
+        stopMusic(playingMusicId);
+      }
 
-    audio.play();
-    setPlayingMusicId(id);
-    setIsPaused(false);
-    setAudioElement(audio);
+      const audio = new Audio(`http://localhost:8000/api/musics/${filename}`);
+      audioRefs.current[id] = audio;
 
-    audio.addEventListener('loadedmetadata', () => {
-      setDuration(audio.duration);
-    });
-
-    audio.addEventListener('timeupdate', () => {
-      setCurrentTime(audio.currentTime);
-    });
-
-    audio.addEventListener('ended', () => {
-      setPlayingMusicId(null);
+      audio.play();
+      setPlayingMusicId(id);
       setIsPaused(false);
-      delete audioRefs.current[id];
-      setCurrentTime(0);
-    });
+      setAudioElement(audio);
+
+      audio.addEventListener('loadedmetadata', () => {
+        setDuration(audio.duration);
+      });
+
+      audio.addEventListener('timeupdate', () => {
+        setCurrentTime(audio.currentTime);
+      });
+
+      audio.addEventListener('ended', () => {
+        setPlayingMusicId(null);
+        setIsPaused(false);
+        delete audioRefs.current[id];
+        setCurrentTime(0);
+        toast.info('Music has ended.');
+      });
+    } catch (err) {
+      toast.error('Error playing the music.');
+    }
   };
 
   const stopMusic = (id) => {
@@ -83,8 +102,13 @@ const MusicList = () => {
 
   const handleDeleteClick = async (id) => {
     if (window.confirm('Are you sure you want to delete this music?')) {
-      await axios.delete(`http://localhost:8000/api/musics/${id}`);
-      dispatch(fetchMusics());
+      try {
+        await axios.delete(`http://localhost:8000/api/musics/${id}`);
+        dispatch(fetchMusics());
+        toast.success('Music deleted successfully.');
+      } catch (error) {
+        toast.error('Failed to delete the music.');
+      }
     }
   };
 
@@ -101,7 +125,6 @@ const MusicList = () => {
     }
   };
 
-  // Categorize musics
   const categorizedMusics = musics.reduce((acc, music) => {
     const category = music.musicType || 'Other';
     if (!acc[category]) acc[category] = [];
@@ -109,16 +132,16 @@ const MusicList = () => {
     return acc;
   }, {});
 
-  // Separate 'Other' category musics
   const otherMusics = categorizedMusics['Other'] || [];
   delete categorizedMusics['Other'];
 
   return (
     <MusicListWrapper>
-      <h1>Music Collection</h1>
+      <ToastContainer />
+      <h1>Melody Mix</h1>
       {Object.entries(categorizedMusics).map(([category, musicList]) => (
         <MusicSection key={category}>
-          <SectionTitle>{category}</SectionTitle>
+          <SectionTitle>{`${category} Musics`}</SectionTitle>
           {musicList.length > 0 ? (
             musicList.map((music) => (
               <MusicItem key={music._id}>
@@ -179,7 +202,6 @@ const MusicList = () => {
         </MusicSection>
       ))}
 
-      {/* Render Other category musics last */}
       {otherMusics.length > 0 && (
         <MusicSection>
           <SectionTitle>Other</SectionTitle>
@@ -214,9 +236,15 @@ const MusicList = () => {
                     {formatTime(currentTime)} / {formatTime(duration)}
                   </TimeDisplay>
                   <ControlButtons>
-                    <ControlButton onClick={() => (playingMusicId === music._id ? pauseMusic(music._id) : resumeMusic(music._id))}>
-                      {playingMusicId === music._id && !isPaused ? <FaPause /> : <FaPlay />}
-                    </ControlButton>
+                    {playingMusicId === music._id && isPaused ? (
+                      <ControlButton onClick={() => resumeMusic(music._id)}>
+                        <FaPlay />
+                      </ControlButton>
+                    ) : (
+                      <ControlButton onClick={() => pauseMusic(music._id)}>
+                        <FaPause />
+                      </ControlButton>
+                    )}
                     <ControlButton onClick={() => stopMusic(music._id)}>
                       Stop
                     </ControlButton>
@@ -226,21 +254,11 @@ const MusicList = () => {
                     value={(currentTime / duration) * 100 || 0}
                     onChange={handleProgressChange}
                   />
-                  <VolumeControl
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    onChange={(e) => {
-                      if (audioElement) {
-                        audioElement.volume = e.target.value;
-                      }
-                    }}
-                  />
                 </AudioPlayer>
               )}
-            </MusicItem>
-          ))}
+          </MusicItem>
+))}
+
         </MusicSection>
       )}
 
@@ -251,42 +269,59 @@ const MusicList = () => {
   );
 };
 
-const formatTime = (time) => {
-  const minutes = Math.floor(time / 60);
-  const seconds = Math.floor(time % 60);
-  return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-};
-
 export default MusicList;
 
+
 const MusicListWrapper = styled.div`
-  padding: 40px;
-  max-width: 1152px; /* Set maximum width */
-  margin: 0 auto; /* Center the content */
+  padding: 20px;
+  max-width: 1152px;
+  margin: 0 auto;
   background: linear-gradient(145deg, #1a1a1a, #2b2b2b);
   color: #ffffff;
   border-radius: 15px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
   transition: background 0.3s ease;
-  
+
   h1 {
     text-align: center;
-    margin-bottom: 30px;
-    font-size: 2.5rem;
+    margin-bottom: 20px;
+    font-size: 2rem;
     color: #FFD700;
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px;
+    h1 {
+      font-size: 1.5rem;
+    }
   }
 `;
 
 const MusicSection = styled.div`
-  margin-bottom: 40px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #FFD700;
+
+  @media (max-width: 768px) {
+    margin-bottom: 15px;
+  }
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 2rem;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #FFD700;
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  text-transform: capitalize;
+  padding: 5px 0;
   display: inline-block;
+  background: linear-gradient(90deg, #FFD700, #FFA500);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
 `;
+
 
 const MusicItem = styled.div`
   display: flex;
@@ -297,32 +332,60 @@ const MusicItem = styled.div`
   background: #2b2b2b;
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    padding: 10px;
+  }
 `;
 
 const MusicDetails = styled.div`
   display: flex;
   justify-content: space-between;
   flex-grow: 1;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
 `;
 
 const Info = styled.div`
   flex-grow: 1;
   margin-right: 20px;
-  
+
   h3 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
   }
-  
+
   p {
     margin: 5px 0;
     color: #CCCCCC;
+  }
+
+  @media (max-width: 768px) {
+    margin-right: 0;
+    h3 {
+      font-size: 1rem;
+    }
   }
 `;
 
 const Actions = styled.div`
   display: flex;
   align-items: center;
+
+  @media (max-width: 768px) {
+    margin-top: 10px;
+  }
+`;
+
+const ControlButtons = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 `;
 
 const ControlButton = styled.button`
@@ -332,15 +395,15 @@ const ControlButton = styled.button`
   font-size: 1.5rem;
   cursor: pointer;
   margin-left: 10px;
-  padding: 10px 15px; /* Optional, can add for a better look */
-  border-radius: 5px; /* Optional for rounded edges */
+  padding: 10px 15px;
+  border-radius: 5px;
   transition: color 0.3s ease;
 
-  &:hover {
-    color: #FFC300;
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+    padding: 8px 10px;
   }
 `;
-
 
 const AudioPlayer = styled.div`
   display: flex;
@@ -352,6 +415,10 @@ const AudioPlayer = styled.div`
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   width: 100%;
+
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
 `;
 
 const TimeDisplay = styled.div`
@@ -359,12 +426,10 @@ const TimeDisplay = styled.div`
   margin-bottom: 10px;
   font-size: 1rem;
   text-align: center;
-`;
 
-const ControlButtons = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const ProgressBar = styled.input`
@@ -385,24 +450,9 @@ const ProgressBar = styled.input`
     background: #FFD700;
     cursor: pointer;
   }
-`;
 
-const VolumeControl = styled.input`
-  -webkit-appearance: none;
-  width: 100%;
-  height: 8px;
-  background: #444;
-  border-radius: 5px;
-  outline: none;
-
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    background: #FFD700;
-    cursor: pointer;
+  @media (max-width: 768px) {
+    height: 6px;
   }
 `;
 
@@ -410,4 +460,9 @@ const NoMusic = styled.p`
   text-align: center;
   color: #CCCCCC;
   font-size: 1.2rem;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
 `;
+
