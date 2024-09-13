@@ -3,8 +3,9 @@ import axios from 'axios';
 import { fetchMusics, fetchMusicsSuccess, fetchMusicsFailure, editMusic } from './musicsSlice';
 
 function* fetchMusicsSaga() {
+  const backendUrl = process.env.REACT_APP_BACKEND_URL;
     try {
-      const response = yield call(axios.get, 'http://localhost:8000/api/musics');
+      const response = yield call(axios.get, `${backendUrl}/api/musics`);
       yield put(fetchMusicsSuccess(response.data));
     } catch (error) {
       yield put(fetchMusicsFailure(error.message));
@@ -14,7 +15,7 @@ function* fetchMusicsSaga() {
 function* editMusicSaga(action) {
     try {
       const { id, updatedMusic } = action.payload;
-      const response = yield call(axios.put, `http://localhost:8000/api/musics/${id}`, updatedMusic);
+      const response = yield call(axios.put, `${backendUrl}/api/musics/${id}`, updatedMusic);
       yield put(editMusic(response.data)); 
       yield put(fetchMusics());
     } catch (error) {
@@ -24,7 +25,7 @@ function* editMusicSaga(action) {
 
 function* deleteMusicSaga(action) {
     try {
-      yield call(axios.delete, `http://localhost:8000/api/musics/${action.payload}`);
+      yield call(axios.delete, `${backendUrl}/api/musics/${action.payload}`);
       yield put(fetchMusics()); 
     } catch (error) {
       console.error('Failed to delete music:', error);

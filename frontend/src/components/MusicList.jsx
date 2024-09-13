@@ -36,13 +36,15 @@ const MusicList = () => {
     }
   }, [error]);
 
+  const backendUrl = process.env.REACT_APP_BACKEND_URL;
+
   const playMusic = (filename, id) => {
     try {
       if (playingMusicId && playingMusicId !== id) {
         stopMusic(playingMusicId);
       }
 
-      const audio = new Audio(`http://localhost:8000/api/musics/${filename}`);
+      const audio = new Audio(`${backendUrl}/api/musics/${filename}`);
       audioRefs.current[id] = audio;
 
       audio.play();
@@ -103,7 +105,7 @@ const MusicList = () => {
   const handleDeleteClick = async (id) => {
     if (window.confirm('Are you sure you want to delete this music?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/musics/${id}`);
+        await axios.delete(`${backendUrl}/api/musics/${id}`);
         dispatch(fetchMusics());
         toast.success('Music deleted successfully.');
       } catch (error) {

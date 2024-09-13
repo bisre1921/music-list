@@ -24,8 +24,10 @@ const MusicForm = () => {
     formData.append('file', file);
     formData.append('type', type); 
 
+    const backendUrl = process.env.REACT_APP_BACKEND_URL;
+
     try {
-        await axios.post('http://localhost:8000/api/musics/upload', formData);
+        await axios.post(`${backendUrl}/api/musics/upload`, formData);
         toast.success('Music uploaded successfully');
         dispatch(fetchMusics());
         setTitle("");
