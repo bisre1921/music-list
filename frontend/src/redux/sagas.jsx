@@ -3,7 +3,7 @@ import axios from 'axios';
 import { fetchMusics, fetchMusicsSuccess, fetchMusicsFailure, editMusic } from './musicsSlice';
 
 function* fetchMusicsSaga() {
-  const backendUrl = process.env.REACT_APP_BACKEND_URL;
+  const backendUrl = process.env.VITE_BACKEND_URL;
     try {
       const response = yield call(axios.get, `${backendUrl}/api/musics`);
       yield put(fetchMusicsSuccess(response.data));
