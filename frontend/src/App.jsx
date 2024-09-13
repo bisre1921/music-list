@@ -1,6 +1,6 @@
 import MusicForm from "./components/MusicForm";
 import MusicList from "./components/MusicList";
-import NavBar from "./components/Navbar";
+import NavBar from "./components/NavBar";
 import { Routes, Route } from 'react-router-dom';
 import styled from '@emotion/styled';
 import "./index.css";

@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import logo from "../assets/logo.png";
 import { Link } from 'react-router-dom'; 
 
-const Navbar = () => {
+const NavBar = () => {
   return (
     <NavigationContainer>
       <LogoContainer>
@@ -21,7 +21,7 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default NavBar;
 
 const NavigationContainer = styled.div`
   display: flex;
