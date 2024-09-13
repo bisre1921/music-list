@@ -24,7 +24,7 @@ const MusicForm = () => {
     formData.append('file', file);
     formData.append('type', type); 
 
-    const backendUrl = process.env.VITE_BACKEND_URL;
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     try {
         await axios.post(`${backendUrl}/api/musics/upload`, formData);
