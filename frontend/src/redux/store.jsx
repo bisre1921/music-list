@@ -7,12 +7,18 @@ const sagaMiddleware = createSagaMiddleware();
 
 const store = configureStore({
     reducer: {
-      musics: musicsReducer,
+        musics: musicsReducer,
     },
-    middleware: (getDefaultMiddleware) => 
-      getDefaultMiddleware({ thunk: false }).concat(sagaMiddleware), 
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+            thunk: false,
+            serializableCheck: {
+                ignoredActions: ['musics/addMusic'], 
+                ignoredPaths: ['payload.musicData'], 
+            },
+        }).concat(sagaMiddleware),
 });
-  
+
 sagaMiddleware.run(rootSaga);
-  
+
 export default store;

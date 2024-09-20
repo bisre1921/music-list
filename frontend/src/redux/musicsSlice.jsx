@@ -1,26 +1,34 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const musicsSlice = createSlice({
-    name: "musics" ,
+    name: "musics",
     initialState: {
-        musics: [] ,
-        loading: false ,
-        error: null ,
-    } , 
+        musics: [],
+        loading: false,
+        error: null,
+    },
     reducers: {
         fetchMusics: (state) => {
             state.loading = true;
-        } ,
-        fetchMusicsSuccess: (state , action) => {
+        },
+        fetchMusicsSuccess: (state, action) => {
             state.loading = false;
-            state.musics = action.payload
-        } ,
+            state.musics = action.payload;
+        },
         fetchMusicsFailure: (state, action) => {
             state.loading = false;
             state.error = action.payload;
         },
-        addMusic: (state, action) => {
-            state.musics.push(action.payload);
+        addMusic: (state) => {
+            state.loading = true; 
+        },
+        addMusicSuccess: (state, action) => {
+            state.loading = false;
+            state.musics.push(action.payload); 
+        },
+        addMusicFailure: (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
         },
         deleteMusic: (state, action) => {
             state.musics = state.musics.filter(music => music._id !== action.payload);
@@ -28,12 +36,21 @@ const musicsSlice = createSlice({
         editMusic: (state, action) => {
             const index = state.musics.findIndex((music) => music._id === action.payload._id);
             if (index !== -1) {
-              state.musics[index] = action.payload;
+                state.musics[index] = action.payload;
             }
         },
     }
-})
+});
 
-export const { fetchMusics, fetchMusicsSuccess, fetchMusicsFailure, addMusic, deleteMusic , editMusic  } = musicsSlice.actions;
+export const {
+    fetchMusics,
+    fetchMusicsSuccess,
+    fetchMusicsFailure,
+    addMusic,
+    addMusicSuccess,
+    addMusicFailure,
+    deleteMusic,
+    editMusic
+} = musicsSlice.actions;
 
 export default musicsSlice.reducer;

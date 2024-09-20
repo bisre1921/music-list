@@ -1,99 +1,90 @@
 import React, { useRef, useState } from 'react';
-import axios from 'axios';
 import { useDispatch } from 'react-redux';
-import { fetchMusics } from '../redux/musicsSlice'; 
+import { addMusic } from '../redux/musicsSlice'; 
 import { useNavigate } from 'react-router-dom'; 
 import styled from '@emotion/styled';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const MusicForm = () => {
-  const [title, setTitle] = useState('');
-  const [artist, setArtist] = useState('');
-  const [type, setType] = useState('reggae');
-  const [file, setFile] = useState(null);
-  const fileInputRef = useRef(null);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+    const [title, setTitle] = useState('');
+    const [artist, setArtist] = useState('');
+    const [type, setType] = useState('reggae');
+    const [file, setFile] = useState(null);
+    const fileInputRef = useRef(null);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('artist', artist);
-    formData.append('file', file);
-    formData.append('type', type); 
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('artist', artist);
+        formData.append('file', file);
+        formData.append('type', type); 
 
-    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+        dispatch(addMusic({ musicData: formData }));
 
-    try {
-        await axios.post(`${backendUrl}/api/musics/upload`, formData);
-        toast.success('Music uploaded successfully');
-        dispatch(fetchMusics());
         setTitle("");
         setArtist("");
         setFile(null);
         fileInputRef.current.value = "";
         navigate('/');
-    } catch (error) {
-        toast.error('Error uploading music');
-        console.log(error);
-    }
-  };
+    };
 
-  return (
-    <PageContainer>
-      <FormContainer>
-        <Header>Upload Your Music</Header>
-        <StyledForm onSubmit={handleSubmit}>
-          <FormField>
-            <label>Music Title</label>
-            <StyledInput type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
-          </FormField>
-          <FormField>
-            <label>Artist</label>
-            <StyledInput type="text" value={artist} onChange={(e) => setArtist(e.target.value)} required />
-          </FormField>
-          <FormField>
-            <label>Music Type</label>
-            <StyledSelect value={type} onChange={(e) => setType(e.target.value)}>
-              <option value="reggae">Reggae</option>
-              <option value="hiphop">Hip-Hop</option>
-              <option value="pop">Pop</option>
-              <option value="rock">Rock</option>
-              <option value="jazz">Jazz</option>
-              <option value="blues">Blues</option>
-              <option value="opera">Opera</option>
-              <option value="funk">Funk</option>
-              <option value="soul">Soul</option>
-              <option value="vocal">Vocal</option>
-              <option value="Other">Other</option>
-            </StyledSelect>
-          </FormField>
-          <FormField>
-            <label>MP3 File</label>
-            <FileInput type="file" ref={fileInputRef} onChange={(e) => setFile(e.target.files[0])} accept=".mp3" />
-          </FormField>
-          <StyledButton type="submit">Upload Music</StyledButton>
-        </StyledForm>
-      </FormContainer>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
-    </PageContainer>
-  );
+    return (
+        <PageContainer>
+            <FormContainer>
+                <Header>Upload Your Music</Header>
+                <StyledForm onSubmit={handleSubmit}>
+                    <FormField>
+                        <label>Music Title</label>
+                        <StyledInput type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
+                    </FormField>
+                    <FormField>
+                        <label>Artist</label>
+                        <StyledInput type="text" value={artist} onChange={(e) => setArtist(e.target.value)} required />
+                    </FormField>
+                    <FormField>
+                        <label>Music Type</label>
+                        <StyledSelect value={type} onChange={(e) => setType(e.target.value)}>
+                            <option value="reggae">Reggae</option>
+                            <option value="hiphop">Hip-Hop</option>
+                            <option value="pop">Pop</option>
+                            <option value="rock">Rock</option>
+                            <option value="jazz">Jazz</option>
+                            <option value="blues">Blues</option>
+                            <option value="opera">Opera</option>
+                            <option value="funk">Funk</option>
+                            <option value="soul">Soul</option>
+                            <option value="vocal">Vocal</option>
+                            <option value="Other">Other</option>
+                        </StyledSelect>
+                    </FormField>
+                    <FormField>
+                        <label>MP3 File</label>
+                        <FileInput type="file" ref={fileInputRef} onChange={(e) => setFile(e.target.files[0])} accept=".mp3" />
+                    </FormField>
+                    <StyledButton type="submit">Upload Music</StyledButton>
+                </StyledForm>
+            </FormContainer>
+            <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
+        </PageContainer>
+    );
 };
 
-
 export default MusicForm;
+
 
 
 const PageContainer = styled.div`
